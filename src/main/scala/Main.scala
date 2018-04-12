@@ -1,10 +1,10 @@
+import io.circe.generic.auto._
+import io.circe.parser._
+import org.querki.jquery._
 import org.scalajs.dom
+import org.scalajs.dom.{Event, MouseEvent, window}
 import org.singlespaced.d3js.Ops._
-import org.singlespaced.d3js.{Selection, d3}
-
-
-import io.circe.generic.auto._, io.circe.parser._
-
+import org.singlespaced.d3js.d3
 
 import scala.scalajs.js
 
@@ -12,83 +12,124 @@ case class JsonObject(nodes: List[SimpleNode], links: List[LinkfromJson])
 
 case class LinkfromJson(source: String, target: String)
 
-case class SimpleNode(id: String, x: Double, y: Double)
+case class SimpleNode(id: String, name: String, playcount: Int)
 
-case class SimpleLink(source: SimpleNode, target: SimpleNode) extends org.singlespaced.d3js.Link[SimpleNode]
+case class LinkD3(source: NodeD3, target: NodeD3) extends org.singlespaced.d3js.Link[NodeD3]
 
+case class NodeD3(id: String, name: String, playcount: Int) extends org.singlespaced.d3js.forceModule.Node
 
+case class Tooltip(tooltipId: String, width: Int) {
+  $("body").append(s"<div class='tooltip' id='$tooltipId'></div>")
+
+  $(s"#$tooltipId").css("width", width)
+
+  hideTooltip()
+
+  def hideTooltip() {
+    $(s"#$tooltipId").hide()
+  }
+
+  def showTooltip(content: String, event: dom.Event) {
+    $("#" + tooltipId).html(content)
+    $("#" + tooltipId).show()
+
+    updatePosition(event)
+  }
+
+  def updatePosition(event: dom.Event) {
+    val ttid = "#" + tooltipId
+    val xOffset = 20
+    val yOffset = 10
+
+    val toolTipW = $(ttid).width()
+    val toolTipeH = $(ttid).height()
+    val windowY = $(window).scrollTop()
+    val windowX = $(window).scrollLeft()
+    val curX = event.asInstanceOf[MouseEvent].pageX
+    val curY = event.asInstanceOf[MouseEvent].pageY
+    var ttleft = if (curX < $(window).width() / 2) curX - toolTipW - xOffset * 2 else curX + xOffset
+    if (ttleft < windowX + xOffset) {
+      ttleft = windowX + xOffset
+    }
+    var tttop = if ((curY - windowY + yOffset * 2 + toolTipeH) > $(window).height()) curY - toolTipeH - yOffset * 2 else curY + yOffset
+    if (tttop < windowY + yOffset) {
+      tttop = curY + yOffset
+    }
+    $(ttid).css("top", tttop + "px").css("left", ttleft + "px")
+  }
+}
 
 object Main {
 
-  val graph = """{
-                |    "nodes": [  { "id": "0", "x": 208.992345, "y": 273.053211 },
-                |                { "id": "1", "x": 595.98896,  "y":  56.377057 },
-                |                { "id": "2", "x": 319.568434, "y": 278.523637 },
-                |                { "id": "3", "x": 214.494264, "y": 214.893585 },
-                |                { "id": "4", "x": 482.664139, "y": 340.386773 },
-                |                { "id": "5", "x":  84.078465, "y": 192.021902 },
-                |                { "id": "6", "x": 196.952261, "y": 370.798667 },
-                |                { "id": "7", "x": 107.358165, "y": 435.15643  },
-                |                { "id": "8", "x": 401.168523, "y": 443.407779 },
-                |                { "id": "9", "x": 508.368779, "y": 386.665811 },
-                |                { "id": "10", "x": 355.93773,  "y": 460.158711 },
-                |                { "id": "11", "x": 283.630624, "y":  87.898162 },
-                |                { "id": "12", "x": 194.771218, "y": 436.366028 },
-                |                { "id": "13", "x": 477.520013, "y": 337.547331 },
-                |                { "id": "14", "x": 572.98129,  "y": 453.668459 },
-                |                { "id": "15", "x": 106.717817, "y": 235.990363 },
-                |                { "id": "16", "x": 265.064649, "y": 396.904945 },
-                |                { "id": "17", "x": 452.719997, "y": 137.886092 }
-                |            ],
-                |    "links": [  { "target": "11", "source":  "0" },
-                |                { "target":  "3", "source":  "0" },
-                |                { "target": "10", "source":  "0" },
-                |                { "target": "16", "source":  "0" },
-                |                { "target":  "1", "source":  "0" },
-                |                { "target":  "3", "source":  "0" },
-                |                { "target":  "9", "source":  "0" },
-                |                { "target":  "5", "source":  "0" },
-                |                { "target": "11", "source":  "0" },
-                |                { "target": "13", "source":  "0" },
-                |                { "target": "16", "source":  "0" },
-                |                { "target":  "3", "source":  "1" },
-                |                { "target":  "9", "source":  "1" },
-                |                { "target": "12", "source":  "1" },
-                |                { "target":  "4", "source":  "2" },
-                |                { "target":  "6", "source":  "2" },
-                |                { "target":  "8", "source":  "2" },
-                |                { "target": "13", "source":  "2" },
-                |                { "target": "10", "source":  "3" },
-                |                { "target": "16", "source":  "3" },
-                |                { "target":  "9", "source":  "3" },
-                |                { "target":  "7", "source":  "3" },
-                |                { "target": "11", "source":  "5" },
-                |                { "target": "13", "source":  "5" },
-                |                { "target": "12", "source":  "5" },
-                |                { "target":  "8", "source":  "6" },
-                |                { "target": "13", "source":  "6" },
-                |                { "target": "10", "source":  "7" },
-                |                { "target": "11", "source":  "7" },
-                |                { "target": "17", "source":  "8" },
-                |                { "target": "13", "source":  "8" },
-                |                { "target": "11", "source": "10" },
-                |                { "target": "16", "source": "10" },
-                |                { "target": "13", "source": "11" },
-                |                { "target": "14", "source": "12" },
-                |                { "target": "14", "source": "12" },
-                |                { "target": "14", "source": "12" },
-                |                { "target": "15", "source": "12" },
-                |                { "target": "16", "source": "12" },
-                |                { "target": "15", "source": "14" },
-                |                { "target": "16", "source": "14" },
-                |                { "target": "15", "source": "14" },
-                |                { "target": "16", "source": "15" },
-                |                { "target": "16", "source": "15" },
-                |                { "target": "17", "source": "16" }
-                |            ]
-                |    }""".stripMargin
+  val graph: String =
+    """{
+      |  "nodes": [
+      |    {
+      |      "name": "smartLab box",
+      |      "id": "smartLab_box",
+      |      "playcount": 661020
+      |    },
+      |    {
+      |      "name": "Temperature 1",
+      |      "id": "temp1",
+      |      "playcount": 772823
+      |    },
+      |    {
+      |      "name": "Temperature 2",
+      |      "id": "temp2",
+      |      "playcount": 772823
+      |    },
+      |    {
+      |      "name": "Temperature 3",
+      |      "id": "temp3",
+      |      "playcount": 772823
+      |    },
+      |    {
+      |      "name": "Temperature 4",
+      |      "id": "temp4",
+      |      "playcount": 772823
+      |    },
+      |    {
+      |      "name": "Temperature 5",
+      |      "id": "temp5",
+      |      "playcount": 772823
+      |    },
+      |    {
+      |      "name": "Temperature 6",
+      |      "id": "temp6",
+      |      "playcount": 772823
+      |    }
+      |    ],
+      |    "links": [
+      |    {
+      |      "source": "smartLab_box",
+      |      "target": "temp1"
+      |    },
+      |    {
+      |      "source": "smartLab_box",
+      |      "target": "temp2"
+      |    },
+      |    {
+      |      "source": "smartLab_box",
+      |      "target": "temp3"
+      |    },
+      |    {
+      |      "source": "smartLab_box",
+      |      "target": "temp4"
+      |    },
+      |    {
+      |      "source": "smartLab_box",
+      |      "target": "temp5"
+      |    },
+      |    {
+      |      "source": "smartLab_box",
+      |      "target": "temp6"
+      |    }
+      |    ]
+      |}""".stripMargin
 
 
+  val tooltip = Tooltip("svg-tooltip", 230)
 
   def main(args: Array[String]): Unit = {
 
@@ -98,7 +139,7 @@ object Main {
     println("Starting the main ...")
 
 
-    var svg = d3.select("#svg").append("svg")
+    val svg = d3.select("#svg").append("svg")
       .attr("width", width)
       .attr("height", height)
 
@@ -106,12 +147,17 @@ object Main {
 
     println(s"parsed nodelist is $nodesList")
 
-    val nodes: js.Array[SimpleNode] = nodesList.nodes.foldLeft(js.Array[SimpleNode]())((array, node) => array :+ node)
+    val nodes: js.Array[NodeD3] = nodesList.nodes.foldLeft(js.Array[NodeD3]())((array, node) => {
+      val newNode = NodeD3(node.id, node.name, node.playcount)
+      newNode.x = Math.floor(Math.random() * width)
+      newNode.y = Math.floor(Math.random() * height)
+      array :+ newNode
+    })
     val nodesById = nodes.groupBy(_.id)
-    val links: js.Array[SimpleLink] = nodesList.links.foldLeft(js.Array[SimpleLink]())((array, node) => {
+    val links: js.Array[LinkD3] = nodesList.links.foldLeft(js.Array[LinkD3]())((array, node) => {
       val source = nodesById(node.source).head
       val target = nodesById(node.target).head
-      array :+ SimpleLink(source, target)
+      array :+ LinkD3(source, target)
     })
 
     val force = d3.layout.force()
@@ -122,27 +168,66 @@ object Main {
 
     val link = svg.selectAll(".link")
       .data(links)
-      .enter().append("line")
+
+    link.enter().append("line")
       .attr("class", "link")
+      .attr("stroke", "#ddd")
+      .attr("stroke-opacity", 0.8)
+      .attr("x1", (d: LinkD3) => d.source.x)
+      .attr("y1", (d: LinkD3) => d.source.y)
+      .attr("x2", (d: LinkD3) => d.target.x)
+      .attr("y2", (d: LinkD3) => d.target.y)
+    link.exit().remove()
 
-    val node: Selection[SimpleNode] = svg.selectAll(".node")
+    val node = svg.selectAll(".node")
       .data(nodes)
-      .enter().append("circle")
+
+
+    node.enter().append("circle")
       .attr("class", "node")
+      .attr("cx", (d: NodeD3) => d.x)
+      .attr("cy", (d: NodeD3) => d.y)
+      .attr("r", (_: NodeD3) => 10)
+      .attr("fill", (d: NodeD3) => if (d.id.equalsIgnoreCase("smartLab_box")) "red" else "blue")
+      .style("stroke-width", 5.0)
 
-    force.on("end", (e: dom.Event) => {
-      node.attr("r", width / 100)
-        .attr("cx", (d: SimpleNode) => d.x)
-        .attr("cy", (d: SimpleNode) => d.y)
+    def showDetails(node: NodeD3): Unit = {
+      val content = "<p class='main'>" + node.name + "</span></p>" +
+        "<hr class='tooltip-hr'>" +
+        "<p class='main'>" + node.playcount + "</span></p>"
 
-      link.attr("x1", (d: SimpleLink) => d.source.x)
-        .attr("y1", (d: SimpleLink) => d.source.y)
-        .attr("x2", (d: SimpleLink) => d.target.x)
-        .attr("y2", (d: SimpleLink) => d.target.y)
-      ()
-    })
-    println("about to start the force")
+      tooltip.showTooltip(content, d3.event.asInstanceOf[dom.Event])
+
+    }
+
+    def hideDetails(node: NodeD3): Unit = {
+      tooltip.hideTooltip()
+    }
+
+    node.on("mouseover", showDetails)
+      .on("mouseout", hideDetails)
+
+    node.exit().remove()
+
+
+    def forceTick(e: Event) = {
+      node
+        .attr("cx", (d: NodeD3) => d.x)
+        .attr("cy", (d: NodeD3) => d.y)
+
+      link
+        .attr("x1", (d: LinkD3) => d.source.x)
+        .attr("y1", (d: LinkD3) => d.source.y)
+        .attr("x2", (d: LinkD3) => d.target.x)
+        .attr("y2", (d: LinkD3) => d.target.y)
+    }
+
+    force.on("tick", forceTick)
+      .charge(-2000)
+      .linkDistance(50)
+
     force.start()
   }
+
 
 }
