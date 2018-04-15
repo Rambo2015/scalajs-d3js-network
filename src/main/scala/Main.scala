@@ -21,7 +21,7 @@ case class LinkfromJson(source: String, target: String)
   */
 case class LinkD3(source: NodeD3, target: NodeD3) extends org.singlespaced.d3js.Link[NodeD3]
 
-case class NodeD3(id: String, name: String, playcount: Int) extends org.singlespaced.d3js.forceModule.Node
+case class NodeD3(id: String, name: String, temp: Int) extends org.singlespaced.d3js.forceModule.Node
 
 /*
   UI Class
@@ -74,6 +74,10 @@ case class D3Graph(targetDivID: String, width: Int, height: Int, tooltip: Toolti
   private var d3Nodes: js.Array[NodeD3] = force.nodes()
   private var d3Links: js.Array[LinkD3] = force.links()
 
+  private val diameterRamp = d3.scale.linear().domain(js.Array(-20, 40)).range(js.Array(1, 20))
+  private val colorRamp = d3.scale.quantile().domain(js.Array(15, 20, 30)).range(js.Array("#5d8fff", "#8dffc5", "#ff8e03"))
+
+
   private val svg = d3.select(s"#$targetDivID")
     .append("svg:svg")
     .attr("width", width)
@@ -84,13 +88,10 @@ case class D3Graph(targetDivID: String, width: Int, height: Int, tooltip: Toolti
     .attr("perserveAspectRatio", "xMinYMid")
     .append("svg:g")
 
-  def updateData(json: String): Unit = {
-    println("Update node ...")
-    //d3.select("svg").remove()
+  def newData(json: String): Unit = {
+    println("Update nodes ...")
     val (newNode, newLink) = convertData(parseJson(json))
-    //d3Nodes.remove(0,d3Nodes.length)
     d3Nodes = newNode
-    //d3Links.remove(0,d3Links.length)
     d3Links = filterLinks(newLink, d3Nodes)
 
     update()
@@ -99,7 +100,7 @@ case class D3Graph(targetDivID: String, width: Int, height: Int, tooltip: Toolti
   def addNode(node: NodeD3) {
     println("Add node ...")
 
-    d3Nodes = d3Nodes :+ NodeD3(node.id, node.name, node.playcount)
+    d3Nodes = d3Nodes :+ NodeD3(node.id, node.name, node.temp)
     println(s"number of nodes after addNode ${d3Nodes.length}")
     update()
   }
@@ -144,8 +145,7 @@ case class D3Graph(targetDivID: String, width: Int, height: Int, tooltip: Toolti
   }
 
   private def filterLinks(allLinks: js.Array[LinkD3], curNodes: js.Array[NodeD3]) = {
-//    val mappedNodes = curNodes.groupBy(_.id)
-    allLinks //.filter(l => mappedNodes.contains(l.source.id) && mappedNodes.contains(l.target.id))
+    allLinks.filter(l => curNodes.contains(l.source) && curNodes.contains(l.target))
   }
 
   private def update(): Unit = {
@@ -155,10 +155,6 @@ case class D3Graph(targetDivID: String, width: Int, height: Int, tooltip: Toolti
     val node = updateNodes()
 
     def forceTick(e: Event) = {
-      //            node
-      //              .attr("cx", (d: NodeD3) => d.x)
-      //              .attr("cy", (d: NodeD3) => d.y)
-
       node.attr("transform", (d: NodeD3) => {
         "translate(" + d.x + "," + d.y + ")"
       })
@@ -173,9 +169,9 @@ case class D3Graph(targetDivID: String, width: Int, height: Int, tooltip: Toolti
     force
       .links(d3Links).nodes(d3Nodes)
       .size(js.Tuple2(width, height)).on("tick", forceTick)
-      .charge(-5000)
-      .linkDistance(90)
-      .gravity(0.5)
+      .charge(-8000)
+      .linkDistance(120)
+      .gravity(0.2)
       .friction(0.1)
       .start()
     keepNodesOnTop()
@@ -218,13 +214,21 @@ case class D3Graph(targetDivID: String, width: Int, height: Int, tooltip: Toolti
       .attr("class", "nodeCircle")
       .attr("cx", (d: NodeD3) => d.x)
       .attr("cy", (d: NodeD3) => d.y)
-      .attr("r", (_: NodeD3) => 10)
-      .attr("fill", (d: NodeD3) => if (d.id.equalsIgnoreCase("smartLab_box")) "red" else "blue")
+      .attr("r", (d: NodeD3) => diameterRamp(d.temp))
+      .attr("fill", (d: NodeD3) => if (d.id.equalsIgnoreCase("smartLab_box")) {
+        "red"
+      } else {
+        val rgb = colorRamp(d.temp)
+        println(rgb)
+        rgb
+      })
       .style("stroke-width", 5.0)
 
     nodeEnter.append("svg:text")
       .attr("class", "textClass")
-      .text((d: NodeD3) => d.id)
+      .attr("text-anchor", "middle")
+      .attr("dy", ".35em") // set offset y position
+      .text((d: NodeD3) => s"${d.temp}")
 
     node.on("click", (_: NodeD3) => tooltip.hideTooltip()).call(force.drag)
     node.on("mouseover", showDetails)
@@ -249,7 +253,7 @@ case class D3Graph(targetDivID: String, width: Int, height: Int, tooltip: Toolti
   private def showDetails(node: NodeD3): Unit = {
     val content = "<p class='main'>" + node.name + "</span></p>" +
       "<hr class='tooltip-hr'>" +
-      "<p class='main'>" + node.playcount + "</span></p>"
+      "<p class='main'>" + node.temp + " °C</span></p>"
 
     tooltip.showTooltip(content, d3.event.asInstanceOf[dom.Event])
 
@@ -278,37 +282,37 @@ object Main {
         |    {
         |      "name": "smartLab box",
         |      "id": "smartLab_box",
-        |      "playcount": 661020
+        |      "temp": 20
         |    },
         |    {
         |      "name": "Temperature 1",
         |      "id": "temp1",
-        |      "playcount": 772823
+        |      "temp": 16
         |    },
         |    {
         |      "name": "Temperature 2",
         |      "id": "temp2",
-        |      "playcount": 772823
+        |      "temp": 14
         |    },
         |    {
         |      "name": "Temperature 3",
         |      "id": "temp3",
-        |      "playcount": 772823
+        |      "temp": 23
         |    },
         |    {
         |      "name": "Temperature 4",
         |      "id": "temp4",
-        |      "playcount": 772823
+        |      "temp": 26
         |    },
         |    {
         |      "name": "Temperature 5",
         |      "id": "temp5",
-        |      "playcount": 772823
+        |      "temp": 30
         |    },
         |    {
         |      "name": "Temperature 6",
         |      "id": "temp6",
-        |      "playcount": 772823
+        |      "temp": 10
         |    }
         |    ],
         |    "links": [
@@ -345,42 +349,42 @@ object Main {
         |    {
         |      "name": "smartLab box",
         |      "id": "smartLab_box",
-        |      "playcount": 661020
+        |      "temp": 21
         |    },
         |    {
         |      "name": "Temperature 1",
         |      "id": "temp1",
-        |      "playcount": 772823
+        |      "temp": 21
         |    },
         |    {
         |      "name": "Temperature 2",
         |      "id": "temp2",
-        |      "playcount": 772823
+        |      "temp": 21
         |    },
         |    {
         |      "name": "Temperature 3",
         |      "id": "temp3",
-        |      "playcount": 772823
+        |      "temp": 21
         |    },
         |    {
         |      "name": "Temperature 4",
         |      "id": "temp4",
-        |      "playcount": 772823
+        |      "temp": 21
         |    },
         |    {
         |      "name": "Temperature 5",
         |      "id": "temp5",
-        |      "playcount": 772823
+        |      "temp": 21
         |    },
         |    {
         |      "name": "Temperature 6",
         |      "id": "temp6",
-        |      "playcount": 772823
+        |      "temp": 21
         |    },
         |    {
         |      "name": "State",
         |      "id": "state_temp6",
-        |      "playcount": 1
+        |      "temp": 21
         |    }
         |    ],
         |    "links": [
@@ -417,7 +421,7 @@ object Main {
         |}""".stripMargin
 
 
-    graph.updateData(json)
+    graph.newData(json)
 
     val initialTimer = 3000
     val increments = 1000
@@ -425,7 +429,7 @@ object Main {
     val it = (0 to 20).map(initialTimer + _ * increments).toIterator
 
     js.timers.setTimeout(it.next()) {
-      graph.addNode(NodeD3("new1", "the new Node", 333))
+      graph.addNode(NodeD3("new1", "the new Node", 23))
       graph.addLink(LinkfromJson("temp4", "new1"))
 
     }
@@ -437,17 +441,21 @@ object Main {
     js.timers.setTimeout(it.next()) {
       graph.addLink(LinkfromJson("new1", "temp5"))
     }
+
     js.timers.setTimeout(it.next()) {
       graph.removeNode("new1")
     }
+
     js.timers.setTimeout(it.next()) {
       graph.removeAllLinks()
     }
+
     js.timers.setTimeout(it.next()) {
       graph.removeAllNodes()
     }
+
     js.timers.setTimeout(it.next()) {
-      graph.updateData(json2Level)
+      graph.newData(json2Level)
     }
   }
 }
