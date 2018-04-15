@@ -2,7 +2,7 @@ name := "scalajs-d3js-network"
 
 version := "0.1"
 
-scalaVersion := "2.12.4"
+scalaVersion := "2.12.5"
 
 
 enablePlugins(ScalaJSPlugin)
@@ -24,7 +24,7 @@ libraryDependencies ++= Seq(
 
 jsDependencies ++= Seq(
   "org.webjars" % "jquery" % "2.2.1" / "jquery.js" minified "jquery.min.js",
-  //"org.webjars" % "d3js" % "4.10.2" / "D3.js" minified "D3.min.js"
+//  "org.webjars" % "d3js" % "4.10.2" / "D3.js" minified "D3.min.js"
 )
 
 

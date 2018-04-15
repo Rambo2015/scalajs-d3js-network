@@ -12,11 +12,9 @@ import scala.scalajs.js
 /*
    Class representing data from JSON
   */
-case class JsonObject(nodes: List[NodeFromJson], links: List[LinkfromJson])
+case class JsonObject(nodes: List[NodeD3], links: List[LinkfromJson])
 
 case class LinkfromJson(source: String, target: String)
-
-case class NodeFromJson(id: String, name: String, playcount: Int)
 
 /*
    D3 specifics Class
@@ -71,9 +69,12 @@ case class Tooltip(tooltipId: String, width: Int) {
 
 case class D3Graph(targetDivID: String, width: Int, height: Int, tooltip: Tooltip) {
 
-  val force: Force[NodeD3, LinkD3] = d3.layout.force()
+  private val force: Force[NodeD3, LinkD3] = d3.layout.force()
 
-  val svg = d3.select(s"#$targetDivID")
+  private var d3Nodes: js.Array[NodeD3] = force.nodes()
+  private var d3Links: js.Array[LinkD3] = force.links()
+
+  private val svg = d3.select(s"#$targetDivID")
     .append("svg:svg")
     .attr("width", width)
     .attr("height", height)
@@ -83,9 +84,6 @@ case class D3Graph(targetDivID: String, width: Int, height: Int, tooltip: Toolti
     .attr("perserveAspectRatio", "xMinYMid")
     .append("svg:g")
 
-  var d3Nodes: js.Array[NodeD3] = force.nodes()
-  var d3Links: js.Array[LinkD3] = force.links()
-
   def updateData(json: String): Unit = {
     println("Update node ...")
     //d3.select("svg").remove()
@@ -94,10 +92,11 @@ case class D3Graph(targetDivID: String, width: Int, height: Int, tooltip: Toolti
     d3Nodes = newNode
     //d3Links.remove(0,d3Links.length)
     d3Links = filterLinks(newLink, d3Nodes)
+
     update()
   }
 
-  def addNode(node: NodeFromJson) {
+  def addNode(node: NodeD3) {
     println("Add node ...")
 
     d3Nodes = d3Nodes :+ NodeD3(node.id, node.name, node.playcount)
@@ -109,7 +108,7 @@ case class D3Graph(targetDivID: String, width: Int, height: Int, tooltip: Toolti
     println("remove node ...")
 
     d3Nodes = d3Nodes.filterNot(_.id == id)
-    d3Links = d3Links.filterNot(link => (link.source.id == id || link.target.id == id))
+    d3Links = d3Links.filterNot(link => link.source.id == id || link.target.id == id)
 
     update()
   }
@@ -132,8 +131,8 @@ case class D3Graph(targetDivID: String, width: Int, height: Int, tooltip: Toolti
 
     (sourceOpt, targetOpt) match {
       case (Some(source), Some(target)) => d3Links = d3Links :+ LinkD3(source, target)
-      case (None, Some(target)) => System.err.println(s"addLink($link): source ${link.source} not found in the nodes")
-      case (Some(source), None) => System.err.println(s"addLink($link): target ${link.target} not found in the nodes")
+      case (None, Some(_)) => System.err.println(s"addLink($link): source ${link.source} not found in the nodes")
+      case (Some(_), None) => System.err.println(s"addLink($link): target ${link.target} not found in the nodes")
       case _ => System.err.println(s"addLink($link): Neither source ${link.source} and target ${link.target} has been found in the nodes")
     }
     update()
@@ -141,11 +140,11 @@ case class D3Graph(targetDivID: String, width: Int, height: Int, tooltip: Toolti
 
 
   private def parseJson(json: String): JsonObject = {
-    decode[JsonObject](json).right.getOrElse(JsonObject(List.empty[NodeFromJson], List.empty[LinkfromJson]))
+    decode[JsonObject](json).right.getOrElse(JsonObject(List.empty[NodeD3], List.empty[LinkfromJson]))
   }
 
   private def filterLinks(allLinks: js.Array[LinkD3], curNodes: js.Array[NodeD3]) = {
-    val mappedNodes = curNodes.groupBy(_.id)
+//    val mappedNodes = curNodes.groupBy(_.id)
     allLinks //.filter(l => mappedNodes.contains(l.source.id) && mappedNodes.contains(l.target.id))
   }
 
@@ -227,7 +226,7 @@ case class D3Graph(targetDivID: String, width: Int, height: Int, tooltip: Toolti
       .attr("class", "textClass")
       .text((d: NodeD3) => d.id)
 
-    node.on("click", (n: NodeD3) => tooltip.hideTooltip()).call(force.drag);
+    node.on("click", (_: NodeD3) => tooltip.hideTooltip()).call(force.drag)
     node.on("mouseover", showDetails)
       .on("mouseout", hideDetails)
 
@@ -236,12 +235,8 @@ case class D3Graph(targetDivID: String, width: Int, height: Int, tooltip: Toolti
   }
 
   private def convertData(fromJson: JsonObject): (js.Array[NodeD3], js.Array[LinkD3]) = {
-    val nodes: js.Array[NodeD3] = fromJson.nodes.foldLeft(js.Array[NodeD3]())((array, node) => {
-      val newNode = NodeD3(node.id, node.name, node.playcount)
-      //      newNode.x = Math.floor(Math.random() * width)
-      //      newNode.y = Math.floor(Math.random() * height)
-      array :+ newNode
-    })
+    import js.JSConverters._
+    val nodes: js.Array[NodeD3] = fromJson.nodes.toJSArray
     val nodesById = nodes.groupBy(_.id)
     val links: js.Array[LinkD3] = fromJson.links.foldLeft(js.Array[LinkD3]())((array, node) => {
       val source = nodesById(node.source).head
@@ -427,14 +422,10 @@ object Main {
     val initialTimer = 3000
     val increments = 1000
 
-    def nextTick(old: Int) = {
-      old + increments
-    }
-
-    val it = (0 to 20).map(3000 + _ * 1000).toIterator
+    val it = (0 to 20).map(initialTimer + _ * increments).toIterator
 
     js.timers.setTimeout(it.next()) {
-      graph.addNode(NodeFromJson("new1", "the new Node", 333))
+      graph.addNode(NodeD3("new1", "the new Node", 333))
       graph.addLink(LinkfromJson("temp4", "new1"))
 
     }
