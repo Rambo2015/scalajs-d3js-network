@@ -1,4 +1,6 @@
-name := "scalajs-d3js-network"
+organization := "io.jorand"
+
+name := "scalajs-components"
 
 version := "0.1"
 
@@ -9,7 +11,6 @@ enablePlugins(ScalaJSPlugin)
 
 // This is an application with a main method
 scalaJSUseMainModuleInitializer := true
-
 
 libraryDependencies ++= Seq(
   "org.scala-js" %%% "scalajs-dom" % "0.9.5",
@@ -24,7 +25,7 @@ libraryDependencies ++= Seq(
 
 jsDependencies ++= Seq(
   "org.webjars" % "jquery" % "2.2.1" / "jquery.js" minified "jquery.min.js",
-//  "org.webjars" % "d3js" % "4.10.2" / "D3.js" minified "D3.min.js"
+  //  "org.webjars" % "d3js" % "4.10.2" / "D3.js" minified "D3.min.js"
 )
 
 
