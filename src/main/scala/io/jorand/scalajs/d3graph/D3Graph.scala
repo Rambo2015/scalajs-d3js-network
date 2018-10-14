@@ -3,16 +3,37 @@ package io.jorand.scalajs.d3graph
 import io.circe.generic.auto._
 import io.circe.parser._
 import io.jorand.scalajs.Tooltip
+import io.jorand.scalajs.d3graph.D3Graph.{Circle, Rect, Shape}
 import org.scalajs.dom
 import org.scalajs.dom.Event
 import org.singlespaced.d3js
 import org.singlespaced.d3js.Ops._
-import org.singlespaced.d3js.d3
 import org.singlespaced.d3js.forceModule.{Force, _}
 import org.singlespaced.d3js.selection.Update
+import org.singlespaced.d3js.{Selection, d3}
 
 import scala.scalajs.js
 import scala.scalajs.js.JSConverters._
+
+object D3Graph {
+
+  sealed trait Shape {
+    def name: String
+
+    def className: String
+  }
+
+  case object Rect extends Shape {
+    val name = "rect"
+    val className = "nodeRect"
+  }
+
+  case object Circle extends Shape {
+    val name = "circle"
+    val className = "nodeCircle"
+  }
+
+}
 
 case class D3Graph(targetDivID: String, width: Int, height: Int, tooltip: Tooltip) {
 
@@ -52,7 +73,7 @@ case class D3Graph(targetDivID: String, width: Int, height: Int, tooltip: Toolti
   def markRootNode(clazz: String): Unit = {
     for (i <- 0 until d3Nodes.length) {
       if (!d3Links.exists(_.target == d3Nodes(i))) {
-        d3Nodes(i).shapeClass = clazz
+        d3Nodes(i).statusClass = clazz
       }
     }
   }
@@ -60,7 +81,7 @@ case class D3Graph(targetDivID: String, width: Int, height: Int, tooltip: Toolti
   def markLeafNode(clazz: String): Unit = {
     for (i <- 0 until d3Nodes.length) {
       if (!d3Links.exists(_.source == d3Nodes(i))) {
-        d3Nodes(i).shapeClass = clazz
+        d3Nodes(i).statusClass = clazz
       }
     }
   }
@@ -72,10 +93,10 @@ case class D3Graph(targetDivID: String, width: Int, height: Int, tooltip: Toolti
       if (d3Nodes(i).id == node.id) {
         d3Nodes(i).nodeText = node.nodeText
         d3Nodes(i).name = node.name
-        d3Nodes(i).shapeClass = node.shapeClass
+        d3Nodes(i).statusClass = node.statusClass
         d3Nodes(i).shape = node.shape
         d3Nodes(i).tooltip = node.tooltip
-        d3Nodes(i).value += node.value
+        d3Nodes(i).value = node.value
       }
     }
     if (d3Nodes.isEmpty || d3Nodes.filter(_.id == node.id).length == 0)
@@ -90,8 +111,6 @@ case class D3Graph(targetDivID: String, width: Int, height: Int, tooltip: Toolti
 
     print(s"nb node before ${d3Nodes.length}")
     d3Nodes = d3Nodes.filterNot(_.id == id)
-    d3Nodes.foreach(n => println(n.id))
-    println(s" and ${d3Nodes.length} after.")
     d3Links = d3Links.filterNot(link => link.source.id == id || link.target.id == id)
 
     update()
@@ -141,8 +160,8 @@ case class D3Graph(targetDivID: String, width: Int, height: Int, tooltip: Toolti
 
     val link = updateLink()
 
-    val nodeCircle = addCircle()
-    val nodeRect = addRect()
+    val nodeCircle = updateNode(Circle, appendCircle, updateCirce)
+    val nodeRect = updateNode(Rect, appendRect, updateRect)
 
     def forceTick(e: Event) = {
       nodeCircle.attr("transform", (d: NodeD3) => "translate(" + d.x + "," + d.y + ")")
@@ -189,33 +208,52 @@ case class D3Graph(targetDivID: String, width: Int, height: Int, tooltip: Toolti
     link
   }
 
-  private def addCircle() = {
-    val node = nodeG.selectAll(".nodeCircle")
-      .data(d3Nodes.filter(_.shape == "circle"), (d: NodeD3, _: Int) => d.id)
+  private def updateNode(shape: Shape, nodeEnterSVGShape: (Shape, Selection[NodeD3]) => _, updateShape: (Shape, Update[NodeD3]) => _) = {
+    val node = nodeG.selectAll(s".${shape.className}")
+      .data(d3Nodes.filter(_.shape.name == shape.name), (d: NodeD3, _: Int) => d.id)
 
     println(s"number of nodes in the updatesNodes ${d3Nodes.length}")
     val nodeEnter = node.enter().append("g")
-      .attr("class", "nodeCircle")
+      .attr("class", shape.className)
       .call(force.drag)
 
     //ENTER
-    if (nodeEnter.size > 0) {
-      nodeEnter.append("svg:circle")
-        .style("stroke-width", 5.0)
-        .attr("cx", (d: NodeD3) => d.x)
-        .attr("cy", (d: NodeD3) => d.y)
+    nodeEnterSVGShape(shape, nodeEnter)
 
-      // UPDATE
-      node.select("circle")
-        .attr("r", (d: NodeD3) => diameterRamp(d.value))
-        .attr("class", (d: NodeD3) => d.shapeClass)
+    // UPDATE
+    updateShape(shape, node)
 
-      // EXIT
-      node.exit().remove()
-      appendText(nodeEnter, node)
-    } else {
-      node
-    }
+    // EXIT
+    node.exit().remove()
+
+    appendText(nodeEnter, node)
+  }
+
+  private def appendCircle(shape: Shape, s: Selection[NodeD3]) = {
+    s.append(s"svg:${shape.name}")
+      .style("stroke-width", 2.0)
+      .attr("cx", (d: NodeD3) => d.x)
+      .attr("cy", (d: NodeD3) => d.y)
+  }
+
+  private def updateCirce(shape: Shape, u: Update[NodeD3]) = {
+    u.select(shape.name)
+      .attr("r", (d: NodeD3) => diameterRamp(d.value))
+      .attr("class", (d: NodeD3) => d.statusClass)
+  }
+
+  private def appendRect(shape: Shape, s: Selection[NodeD3]) = {
+    s.append(s"svg:${shape.name}")
+      .style("stroke-width", 2.0)
+      .attr("x", (d: NodeD3) => -squareRamp(d.value) / 2)
+      .attr("y", (d: NodeD3) => -squareRamp(d.value) / 2)
+      .attr("width", (d: NodeD3) => squareRamp(d.value))
+      .attr("height", (d: NodeD3) => squareRamp(d.value))
+  }
+
+  private def updateRect(shape: Shape, u: Update[NodeD3]) = {
+    u.select(shape.name)
+      .attr("class", (d: NodeD3) => d.statusClass)
   }
 
   private def appendText(nodeEnter: d3js.Selection[NodeD3], node: Update[NodeD3]): Update[NodeD3] = {
@@ -232,39 +270,6 @@ case class D3Graph(targetDivID: String, width: Int, height: Int, tooltip: Toolti
     node.on("click", (_: NodeD3) => tooltip.hideTooltip()).call(force.drag)
     node.on("mouseover", showDetails)
       .on("mouseout", hideDetails)
-  }
-
-  private def addRect() = {
-    val node = nodeG.selectAll(".nodeRect")
-      .data(d3Nodes.filter(_.shape == "rect"), (d: NodeD3, _: Int) => d.id)
-
-    println(s"number of nodes in the updatesNodes ${d3Nodes.filter(_.shape == "rect").length}")
-    val nodeEnter = node.enter().append("g")
-      .attr("class", "nodeRect")
-      .call(force.drag)
-
-    println(s"${nodeEnter.size()} node(s) entered")
-    //ENTER
-    if (nodeEnter.size > 0) {
-      nodeEnter.append("svg:rect")
-        .style("stroke-width", 5.0)
-        .attr("x", (d: NodeD3) => -squareRamp(d.value) / 2)
-        .attr("y", (d: NodeD3) => -squareRamp(d.value) / 2)
-        .attr("width", (d: NodeD3) => squareRamp(d.value))
-        .attr("height", (d: NodeD3) => squareRamp(d.value))
-
-      // UPDATE
-      node.select("rect")
-        .attr("class", (d: NodeD3) => d.shapeClass)
-
-      // EXIT
-      println(s"remove exit from ${node.attr("id")}")
-      node.exit().remove()
-      println(s"append text to ${node.attr("id")}")
-      appendText(nodeEnter, node)
-    } else {
-      node
-    }
   }
 
   private def convertData(fromJson: D3GraphData): (js.Array[NodeD3], js.Array[LinkD3]) = {
@@ -302,4 +307,5 @@ case class LinkD3(source: NodeD3, target: NodeD3) extends org.singlespaced.d3js.
 
 case class LinkD3Json(source: String, target: String)
 
-case class NodeD3(id: String, var name: String, var value: Int, var tooltip: String = "", var nodeText: String = "node", var shapeClass: String = "online", var shape: String = "circle") extends Node
+case class NodeD3(id: String, var name: String, var value: Int, var tooltip: String = "", var nodeText: String = "node", var statusClass: String = "online", var shape: Shape =
+Circle) extends Node
