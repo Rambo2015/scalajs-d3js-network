@@ -23,7 +23,6 @@ case class D3Graph(targetDivID: String, width: Int, height: Int, tooltip: Toolti
 
   private val diameterRamp = d3.scale.linear().domain(js.Array(-20, 40)).range(js.Array(1, 20))
   private val squareRamp = d3.scale.linear().domain(js.Array(-20, 40)).range(js.Array(1, 46))
-  private val colorRamp = d3.scale.quantile().domain(js.Array(15, 20, 30)).range(js.Array("#5d8fff", "#8dffc5", "#ff8e03"))
 
 
   private val svg = d3.select(s"#$targetDivID")
@@ -89,7 +88,10 @@ case class D3Graph(targetDivID: String, width: Int, height: Int, tooltip: Toolti
   def removeNode(id: String): Unit = {
     println("remove node ...")
 
+    print(s"nb node before ${d3Nodes.length}")
     d3Nodes = d3Nodes.filterNot(_.id == id)
+    d3Nodes.foreach(n => println(n.id))
+    println(s" and ${d3Nodes.length} after.")
     d3Links = d3Links.filterNot(link => link.source.id == id || link.target.id == id)
 
     update()
@@ -124,7 +126,7 @@ case class D3Graph(targetDivID: String, width: Int, height: Int, tooltip: Toolti
   private def parseJson(json: String): D3GraphData = {
     val graph = decode[D3GraphData](json)
     graph match {
-      case Right(graph) => graph
+      case Right(g) => g
       case Left(error) =>
         println(error)
         D3GraphData(List.empty[NodeD3], List.empty[LinkD3Json])

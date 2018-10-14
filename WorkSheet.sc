@@ -21,12 +21,12 @@ val back = decode[Greeting](greetJSON.spaces2)
 trait NodeTest  {
   def parent: NodeTest
 }
-case class NodeD3Test(id: String,  name: String,  value: Int, var tooltip: String = "", var nodeText: String = "node", var circleClass: String = "online") extends NodeTest
-case class NodeD3    (id: String, var name: String, var value: Int, var tooltip: String = "", var nodeText: String = "node", var circleClass: String = "online") extends Node
+//case class NodeD3Test(id: String,  name: String,  value: Int, var tooltip: String = "", var nodeText: String = "node", var circleClass: String = "online") extends NodeTest
+case class NodeD3(id: String, var name: String, var value: Int, var tooltip: String = "", var nodeText: String = "node", var circleClass: String = "online") extends Node
 
 
 
-val nodeTest = new NodeD3("theId", "name", 23)
+val nodeTest = NodeD3("theId", "name", 23)
 
 val node = nodeTest
 val jsonNode = node.asJson
