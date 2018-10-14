@@ -127,10 +127,14 @@ object Main {
 
     val it = (0 to 20).map(initialTimer + _ * increments).toIterator
 
+    def shape(i: Int): String = i match {
+      case t if t % 3 == 0 => "rect"
+      case _ => "circle"
+    }
     def createGrappe(prefix: String, status: (Int) => String): Unit = {
       graph.addNode(NodeD3(s"newroot$prefix", "the new Node", 23, "<p>tooltip</p>", "root", "rootNode"))
       for (i <- 1 to 10) {
-        graph.addNode(NodeD3(s"new$i$prefix", s"the new Node $i$prefix", i, s"<p>tooltip $i$prefix</p>", s"node$i$prefix", status(i)))
+        graph.addNode(NodeD3(s"new$i$prefix", s"the new Node $i$prefix", i, s"<p>tooltip $i$prefix</p>", s"node$i$prefix", status(i), shape(i)))
         graph.addLink(LinkD3Json(s"new$i$prefix", s"newroot$prefix"))
       }
     }
