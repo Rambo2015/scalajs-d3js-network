@@ -4,7 +4,7 @@ import io.circe.generic.auto._
 import io.circe.parser._
 import io.jorand.scalajs.Tooltip
 import org.scalajs.dom
-import org.scalajs.dom.{Event}
+import org.scalajs.dom.Event
 import org.singlespaced.d3js
 import org.singlespaced.d3js.Ops._
 import org.singlespaced.d3js.d3
@@ -246,8 +246,8 @@ case class D3Graph(targetDivID: String, width: Int, height: Int, tooltip: Toolti
     if (nodeEnter.size > 0) {
       nodeEnter.append("svg:rect")
         .style("stroke-width", 5.0)
-        .attr("x", (d: NodeD3) => d.x)
-        .attr("y", (d: NodeD3) => d.y)
+        .attr("x", (d: NodeD3) => -squareRamp(d.value) / 2)
+        .attr("y", (d: NodeD3) => -squareRamp(d.value) / 2)
         .attr("width", (d: NodeD3) => squareRamp(d.value))
         .attr("height", (d: NodeD3) => squareRamp(d.value))
 
