@@ -133,7 +133,7 @@ case class D3Graph(targetDivID: String, width: Int, height: Int, tooltip: Toolti
     val targetOpt = d3Nodes.find(_.id == link.target)
 
     (sourceOpt, targetOpt) match {
-      case (Some(source), Some(target)) => d3Links = d3Links :+ LinkD3(source, target)
+      case (Some(source), Some(target)) => d3Links = d3Links :+ LinkD3(source, target, link.color)
       case (None, Some(_)) => System.err.println(s"addLink($link): source ${link.source} not found in the nodes")
       case (Some(_), None) => System.err.println(s"addLink($link): target ${link.target} not found in the nodes")
       case _ => System.err.println(s"addLink($link): Neither source ${link.source} and target ${link.target} has been found in the nodes")
@@ -192,7 +192,7 @@ case class D3Graph(targetDivID: String, width: Int, height: Int, tooltip: Toolti
 
     link.enter().append("line")
       .attr("class", "link")
-      .attr("stroke", "#ddd")
+      .attr("stroke", (d: LinkD3) => d.color)
       .attr("stroke-opacity", 0.8)
       .attr("x1", (d: LinkD3) => d.source.x)
       .attr("y1", (d: LinkD3) => d.source.y)
@@ -280,7 +280,7 @@ case class D3Graph(targetDivID: String, width: Int, height: Int, tooltip: Toolti
     val links: js.Array[LinkD3] = fromJson.links.foldLeft(js.Array[LinkD3]())((array, node) => {
       val source = nodesById(node.source).head
       val target = nodesById(node.target).head
-      array :+ LinkD3(source, target)
+      array :+ LinkD3(source, target, node.color)
     })
     (nodes, links)
   }
@@ -303,9 +303,9 @@ case class D3GraphData(nodes: List[NodeD3], links: List[LinkD3Json])
 /*
    D3 specifics Class
   */
-case class LinkD3(source: NodeD3, target: NodeD3) extends org.singlespaced.d3js.Link[NodeD3]
+case class LinkD3(source: NodeD3, target: NodeD3, color: String = "#000") extends org.singlespaced.d3js.Link[NodeD3]
 
-case class LinkD3Json(source: String, target: String)
+case class LinkD3Json(source: String, target: String, color: String = "#000")
 
 case class NodeD3(id: String, var name: String, var value: Int, var tooltip: String = "", var nodeText: String = "node", var statusClass: String = "online", var shape: Shape =
 Circle) extends Node

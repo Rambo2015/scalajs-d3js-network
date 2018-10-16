@@ -29,7 +29,7 @@ object Main {
 
     // Link the two root
     js.timers.setTimeout(it.next()) {
-      graph.addLink(LinkD3Json("newroot,1", "newroot"))
+      graph.addLink(LinkD3Json("newroot,1", "newroot", "#00e"))
     }
 
     // Remove some nodes
@@ -62,12 +62,17 @@ object Main {
       case _ => D3Graph.Circle
     }
 
+    def color(i: Int): String = i match {
+      case t if t % 3 == 0 => "#f00"
+      case _ => "#222"
+    }
+
 
     def createGrape(prefix: String, status: Int => String): Unit = {
       graph.addNode(NodeD3(s"newroot$prefix", "the new Node", 23, "<p>tooltip</p>", "root", "rootNode"))
       for (i <- 1 to 10) {
         graph.addNode(NodeD3(s"new-$i$prefix", s"the new Node $i$prefix", i, s"<p>tooltip $i$prefix</p>", s"node-$i$prefix", status(i), shape(i)))
-        graph.addLink(LinkD3Json(s"new-$i$prefix", s"newroot$prefix"))
+        graph.addLink(LinkD3Json(s"new-$i$prefix", s"newroot$prefix", color(i)))
       }
     }
 
