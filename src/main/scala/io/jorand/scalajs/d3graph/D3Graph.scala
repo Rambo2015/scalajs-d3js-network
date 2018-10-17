@@ -35,7 +35,7 @@ object D3Graph {
 
 }
 
-case class D3Graph(targetDivID: String, width: Int, height: Int, tooltip: Tooltip) {
+case class D3Graph(targetDivID: String, width: Int, height: Int, tooltip: Tooltip, withArrows: Boolean = false) {
 
   private val force: Force[NodeD3, LinkD3] = d3.layout.force()
 
@@ -54,6 +54,22 @@ case class D3Graph(targetDivID: String, width: Int, height: Int, tooltip: Toolti
     .attr("pointer-events", "all")
     .attr("viewBox", "0 0 " + width + " " + height)
     .attr("perserveAspectRatio", "xMinYMid")
+
+
+  if(withArrows) {
+    svg.append("defs").append("marker")
+      .attr("id", "arrow")
+      .attr("markerUnits", "strokeWidth")
+      .attr("markerWidth", "5")
+      .attr("markerHeigth", "5")
+      .attr("markerHeight", "5")
+      .attr("refX", "10")
+      .attr("refY", "2.5")
+      .attr("orient", "auto")
+      .append("path")
+      .attr("d", "M0,0 L5,2.5 L0,5 Z")
+      .attr("style", "fill: #000")
+  }
 
   private val linkG = svg.append("g").attr("id", "links")
   private val nodeG = svg.append("g").attr("id", "nodes")
@@ -133,7 +149,7 @@ case class D3Graph(targetDivID: String, width: Int, height: Int, tooltip: Toolti
     val targetOpt = d3Nodes.find(_.id == link.target)
 
     (sourceOpt, targetOpt) match {
-      case (Some(source), Some(target)) => d3Links = d3Links :+ LinkD3(source, target)
+      case (Some(source), Some(target)) => d3Links = d3Links :+ LinkD3(source, target, link.color)
       case (None, Some(_)) => System.err.println(s"addLink($link): source ${link.source} not found in the nodes")
       case (Some(_), None) => System.err.println(s"addLink($link): target ${link.target} not found in the nodes")
       case _ => System.err.println(s"addLink($link): Neither source ${link.source} and target ${link.target} has been found in the nodes")
@@ -190,14 +206,18 @@ case class D3Graph(targetDivID: String, width: Int, height: Int, tooltip: Toolti
 
     println(s"number of links in the updatesLinks ${d3Links.length}")
 
-    link.enter().append("line")
+   val line =  link.enter().append("line")
       .attr("class", "link")
-      .attr("stroke", "#ddd")
+      .attr("stroke", (d: LinkD3) => d.color)
       .attr("stroke-opacity", 0.8)
       .attr("x1", (d: LinkD3) => d.source.x)
       .attr("y1", (d: LinkD3) => d.source.y)
       .attr("x2", (d: LinkD3) => d.target.x)
       .attr("y2", (d: LinkD3) => d.target.y)
+
+      if (withArrows){
+        line.attr("marker-end", (d: LinkD3) => s"url(#arrow)")
+      }
 
     link.append("title")
       .text((d: LinkD3) => {
@@ -280,7 +300,7 @@ case class D3Graph(targetDivID: String, width: Int, height: Int, tooltip: Toolti
     val links: js.Array[LinkD3] = fromJson.links.foldLeft(js.Array[LinkD3]())((array, node) => {
       val source = nodesById(node.source).head
       val target = nodesById(node.target).head
-      array :+ LinkD3(source, target)
+      array :+ LinkD3(source, target, node.color)
     })
     (nodes, links)
   }
@@ -303,9 +323,8 @@ case class D3GraphData(nodes: List[NodeD3], links: List[LinkD3Json])
 /*
    D3 specifics Class
   */
-case class LinkD3(source: NodeD3, target: NodeD3) extends org.singlespaced.d3js.Link[NodeD3]
+case class LinkD3(source: NodeD3, target: NodeD3, color: String = "#000") extends org.singlespaced.d3js.Link[NodeD3]
 
-case class LinkD3Json(source: String, target: String)
+case class LinkD3Json(source: String, target: String, color: String = "#000")
 
-case class NodeD3(id: String, var name: String, var value: Int, var tooltip: String = "", var nodeText: String = "node", var statusClass: String = "online", var shape: Shape =
-Circle) extends Node
+case class NodeD3(id: String, var name: String, var value: Int, var tooltip: String = "", var nodeText: String = "node", var statusClass: String = "online", var shape: Shape = Circle) extends Node
