@@ -35,7 +35,7 @@ object D3Graph {
 
 }
 
-case class D3Graph(targetDivID: String, width: Int, height: Int, tooltip: Tooltip) {
+case class D3Graph(targetDivID: String, width: Int, height: Int, tooltip: Tooltip, withArrows: Boolean = false) {
 
   private val force: Force[NodeD3, LinkD3] = d3.layout.force()
 
@@ -54,6 +54,22 @@ case class D3Graph(targetDivID: String, width: Int, height: Int, tooltip: Toolti
     .attr("pointer-events", "all")
     .attr("viewBox", "0 0 " + width + " " + height)
     .attr("perserveAspectRatio", "xMinYMid")
+
+
+  if(withArrows) {
+    svg.append("defs").append("marker")
+      .attr("id", "arrow")
+      .attr("markerUnits", "strokeWidth")
+      .attr("markerWidth", "5")
+      .attr("markerHeigth", "5")
+      .attr("markerHeight", "5")
+      .attr("refX", "10")
+      .attr("refY", "2.5")
+      .attr("orient", "auto")
+      .append("path")
+      .attr("d", "M0,0 L5,2.5 L0,5 Z")
+      .attr("style", "fill: #000")
+  }
 
   private val linkG = svg.append("g").attr("id", "links")
   private val nodeG = svg.append("g").attr("id", "nodes")
@@ -190,7 +206,7 @@ case class D3Graph(targetDivID: String, width: Int, height: Int, tooltip: Toolti
 
     println(s"number of links in the updatesLinks ${d3Links.length}")
 
-    link.enter().append("line")
+   val line =  link.enter().append("line")
       .attr("class", "link")
       .attr("stroke", (d: LinkD3) => d.color)
       .attr("stroke-opacity", 0.8)
@@ -198,6 +214,10 @@ case class D3Graph(targetDivID: String, width: Int, height: Int, tooltip: Toolti
       .attr("y1", (d: LinkD3) => d.source.y)
       .attr("x2", (d: LinkD3) => d.target.x)
       .attr("y2", (d: LinkD3) => d.target.y)
+
+      if (withArrows){
+        line.attr("marker-end", (d: LinkD3) => s"url(#arrow)")
+      }
 
     link.append("title")
       .text((d: LinkD3) => {
@@ -307,5 +327,4 @@ case class LinkD3(source: NodeD3, target: NodeD3, color: String = "#000") extend
 
 case class LinkD3Json(source: String, target: String, color: String = "#000")
 
-case class NodeD3(id: String, var name: String, var value: Int, var tooltip: String = "", var nodeText: String = "node", var statusClass: String = "online", var shape: Shape =
-Circle) extends Node
+case class NodeD3(id: String, var name: String, var value: Int, var tooltip: String = "", var nodeText: String = "node", var statusClass: String = "online", var shape: Shape = Circle) extends Node
