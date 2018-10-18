@@ -138,6 +138,7 @@ case class D3Graph(targetDivID: String, width: Int, height: Int, tooltip: Toolti
       if (d3Links(i).source.id == link.source && d3Links(i).target.id == link.target) {
         d3Links(i).color = link.color
         d3Links(i).endArrow = link.endArrow
+        d3Links(i).width = link.width
       }
     }
 
@@ -145,7 +146,7 @@ case class D3Graph(targetDivID: String, width: Int, height: Int, tooltip: Toolti
     val targetOpt = d3Nodes.find(_.id == link.target)
 
     (sourceOpt, targetOpt) match {
-      case (Some(source), Some(target)) => d3Links = d3Links :+ LinkD3(source, target, link.color, link.endArrow)
+      case (Some(source), Some(target)) => d3Links = d3Links :+ LinkD3(source, target, link.color, link.width, link.endArrow)
       case (None, Some(_)) => System.err.println(s"addLink($link): source ${link.source} not found in the nodes")
       case (Some(_), None) => System.err.println(s"addLink($link): target ${link.target} not found in the nodes")
       case _ => System.err.println(s"addLink($link): Neither source ${link.source} and target ${link.target} has been found in the nodes")
@@ -233,6 +234,7 @@ case class D3Graph(targetDivID: String, width: Int, height: Int, tooltip: Toolti
       .attr("class", "link")
       .attr("stroke", (d: LinkD3) => d.color)
       .attr("stroke-opacity", 0.8)
+      .attr("stroke-width", (d: LinkD3) => d.width)
       .attr("x1", (d: LinkD3) => d.source.x)
       .attr("y1", (d: LinkD3) => d.source.y)
       .attr("x2", (d: LinkD3) => d.target.x)
@@ -321,7 +323,6 @@ case class D3Graph(targetDivID: String, width: Int, height: Int, tooltip: Toolti
 
   private def convertData(fromJson: D3GraphData): (js.Array[NodeD3], js.Array[LinkD3]) = {
     val nodes: js.Array[NodeD3] = fromJson.nodes.toJSArray
-    println(s"nodes: $nodes")
     val nodesById = nodes.groupBy(_.id)
     println(s"nodes by ID: $nodesById")
     val links: js.Array[LinkD3] = fromJson.links.foldLeft(js.Array[LinkD3]())((array, node) => {
@@ -350,8 +351,8 @@ case class D3GraphData(nodes: List[NodeD3], links: List[LinkD3Json])
 /*
    D3 specifics Class
   */
-case class LinkD3(source: NodeD3, target: NodeD3, var color: String = "#000", var endArrow: Boolean = false) extends org.singlespaced.d3js.Link[NodeD3]
+case class LinkD3(source: NodeD3, target: NodeD3, var color: String = "#000", var width: Int = 1, var endArrow: Boolean = false) extends org.singlespaced.d3js.Link[NodeD3]
 
-case class LinkD3Json(source: String, target: String, color: String = "#000", endArrow: Boolean = false)
+case class LinkD3Json(source: String, target: String, color: String = "#000", width: Int = 1, endArrow: Boolean = false)
 
 case class NodeD3(id: String, var name: String, var value: Int, var tooltip: String = "", var nodeText: String = "node", var statusClass: String = "online", var shape: Shape = Circle) extends Node
