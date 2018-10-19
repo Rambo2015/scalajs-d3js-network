@@ -2,6 +2,7 @@ import io.jorand.scalajs.Tooltip
 import io.jorand.scalajs.d3graph.{D3Graph, LinkD3Json, NodeD3}
 
 import scala.scalajs.js
+import scala.util.Random
 
 object Main {
 
@@ -15,16 +16,16 @@ object Main {
     val it = (0 to 20).map(initialTimer + _ * increments).toIterator
 
     // Create and show the initial graph
-    createGrape("", _ => "online")
+    createGrape("",23, _ => "online", _ => "grey")
 
-    // Create the same grape but with different status, should update the node
+    // Create the same grape but with different status and set the link color to random color, should update the node and the link
     js.timers.setTimeout(it.next()) {
-      createGrape("", i => if (i % 2 == 0) "online" else "offline")
+      createGrape("", 30, i => if (i % 2 == 0) "online" else "offline", randomColor)
     }
 
     // Create a new grape with another name
     js.timers.setTimeout(it.next()) {
-      createGrape(",1", i => if (i % 3 == 0) "online" else "offline")
+      createGrape(",1", 45, i => if (i % 3 == 0) "online" else "offline")
     }
 
     // Link the two root
@@ -53,9 +54,13 @@ object Main {
 
     // Recreate a grape to inspect the structure in the browser.
     js.timers.setTimeout(it.next()) {
-      createGrape("--", i => if (i % 4 == 0) "online" else "offline")
+      createGrape("--", 14, i => if (i % 4 == 0) "online" else "offline")
     }
 
+    def randomColor(i: Int) = {
+      val arrayColor = Array("#a6a6a6", "#9ff44d", "#ff84ff")
+      arrayColor(Random.nextInt(arrayColor.length))
+    }
 
     def shape(i: Int): D3Graph.Shape = i match {
       case t if t % 3 == 0 => D3Graph.Rect
@@ -68,11 +73,11 @@ object Main {
     }
 
 
-    def createGrape(prefix: String, status: Int => String): Unit = {
-      graph.addNode(NodeD3(s"newroot$prefix", "the new Node", 23, "<p>tooltip</p>", "root", "rootNode"))
+    def createGrape(prefix: String, rootValue: Int, status: Int => String, linkColor: Int => String = i => color(i), value: Int => Int = i => i): Unit = {
+      graph.addNode(NodeD3(s"newroot$prefix", "the new Node", rootValue, "<p>tooltip</p>", "root", "rootNode"))
       for (i <- 1 to 10) {
-        graph.addNode(NodeD3(s"new-$i$prefix", s"the new Node $i$prefix", i, s"<p>tooltip $i$prefix</p>", s"node-$i$prefix", status(i), shape(i)))
-        graph.addLink(LinkD3Json(s"new-$i$prefix", s"newroot$prefix", color(i)))
+        graph.addNode(NodeD3(s"new-$i$prefix", s"the new Node $i$prefix", value(i), s"<p>tooltip $i$prefix</p>", s"node-$i$prefix", status(i), shape(i)))
+        graph.addLink(LinkD3Json(s"new-$i$prefix", s"newroot$prefix", linkColor(i), endArrow = true))
       }
     }
 
