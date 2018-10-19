@@ -1,0 +1,23 @@
+language: scala
+script:
+  - sbt ++$TRAVIS_SCALA_VERSION package
+after_success:
+  - sbt ++$TRAVIS_SCALA_VERSION publish
+scala:
+  - 2.11.12
+  - 2.12.7
+jdk:
+  - oraclejdk8
+  - openjdk8
+sbt_args:
+  -no-colors -J-Xss2m
+cache:
+  directories:
+  - $HOME/.ivy2/cache
+  - $HOME/.sbt/boot/
+install:
+  - . $HOME/.nvm/nvm.sh
+  - nvm install stable
+  - nvm use stable
+  - npm install
+  - npm install jsdom
