@@ -1,0 +1,24 @@
+{
+  "name": "scalajs-d3js-network",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "dependencies": {
+    "jsdom": "^12.2.0",
+    "source-map-support": "^0.5.4"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/iPomme/scalajs-d3js-network.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/iPomme/scalajs-d3js-network/issues"
+  },
+  "homepage": "https://github.com/iPomme/scalajs-d3js-network#readme"
+}

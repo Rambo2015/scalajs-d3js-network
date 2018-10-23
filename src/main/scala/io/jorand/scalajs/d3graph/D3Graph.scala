@@ -45,7 +45,6 @@ case class D3Graph(targetDivID: String, width: Int, height: Int, tooltip: Toolti
   private val diameterRamp = d3.scale.linear().domain(js.Array(-20, 40)).range(js.Array(1, 20))
   private val squareRamp = d3.scale.linear().domain(js.Array(-20, 40)).range(js.Array(1, 46))
 
-
   private val svg = d3.select(s"#$targetDivID")
     .append("svg:svg")
     .attr("width", width)
@@ -54,7 +53,6 @@ case class D3Graph(targetDivID: String, width: Int, height: Int, tooltip: Toolti
     .attr("pointer-events", "all")
     .attr("viewBox", "0 0 " + width + " " + height)
     .attr("perserveAspectRatio", "xMinYMid")
-
 
 
   private val linkG = svg.append("g").attr("id", "links")
