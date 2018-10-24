@@ -213,7 +213,7 @@ case class D3Graph(targetDivID: String, width: Int, height: Int, tooltip: Toolti
       .attr("class", "defsContainer")
 
     defsEnter.append("marker")
-      .attr("id", (t: LinkD3) => s"marker-${t.source.id}_${t.target.id}")
+      .attr("id", (t: LinkD3) => markerID(t.source,t.target))
       .attr("class", "markerClass")
       .attr("markerUnits", "userSpaceOnUse")
       .attr("markerWidth", "12")
@@ -235,7 +235,7 @@ case class D3Graph(targetDivID: String, width: Int, height: Int, tooltip: Toolti
       .attr("y1", (d: LinkD3) => d.source.y)
       .attr("x2", (d: LinkD3) => d.target.x)
       .attr("y2", (d: LinkD3) => d.target.y)
-      .attr("marker-end", (d: LinkD3) => if (d.endArrow) s"url(#marker-${d.target.id})" else "")
+      .attr("marker-end", (d: LinkD3) => if (d.endArrow) s"url(#${markerID(d.source, d.target)})" else "")
 
     // Update
     defs.select("marker")
@@ -245,7 +245,7 @@ case class D3Graph(targetDivID: String, width: Int, height: Int, tooltip: Toolti
 
     val line = link.select("line")
       .attr("stroke", (d: LinkD3) => d.color)
-      .attr("marker-end", (d: LinkD3) => if (d.endArrow) s"url(#marker-${d.source.id}_${d.target.id})" else "")
+      .attr("marker-end", (d: LinkD3) => if (d.endArrow) s"url(#${markerID(d.source, d.target)}" else "")
 
 
     defs.exit().remove()
@@ -337,6 +337,12 @@ case class D3Graph(targetDivID: String, width: Int, height: Int, tooltip: Toolti
   private def hideDetails(node: NodeD3): Unit = {
     tooltip.hideTooltip()
   }
+
+  private def markerID(source: NodeD3, target: NodeD3) ={
+    s"marker-${clean(source.id)}_${clean(target.id)}"
+  }
+
+  private def clean(url:String) = url.replaceAll(" ","")
 
 }
 
