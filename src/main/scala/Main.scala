@@ -102,10 +102,10 @@ object Main {
       case _ => "#222"
     }
 
-    def width(i: Int): Int = i match {
-      case t if t % 3 == 0 => 1
-      case t if t % 3 == 1 => 5
-      case _ => 8
+    def width(i: Int): Float = i match {
+      case t if t % 3 == 0 => 0.5f
+      case t if t % 3 == 1 => 1f
+      case _ => 3f
     }
 
 

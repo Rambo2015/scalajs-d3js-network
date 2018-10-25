@@ -351,8 +351,8 @@ case class D3GraphData(nodes: List[NodeD3], links: List[LinkD3Json])
 /*
    D3 specifics Class
   */
-case class LinkD3(source: NodeD3, target: NodeD3, var color: String = "#000", var width: Int = 1, var endArrow: Boolean = false) extends org.singlespaced.d3js.Link[NodeD3]
+case class LinkD3(source: NodeD3, target: NodeD3, var color: String = "#000", var width: Float = 1, var endArrow: Boolean = false) extends org.singlespaced.d3js.Link[NodeD3]
 
-case class LinkD3Json(source: String, target: String, color: String = "#000", width: Int = 1, endArrow: Boolean = false)
+case class LinkD3Json(source: String, target: String, color: String = "#000", width: Float = 1, endArrow: Boolean = false)
 
 case class NodeD3(id: String, var name: String, var value: Int, var tooltip: String = "", var nodeText: String = "node", var statusClass: String = "online", var shape: Shape = Circle) extends Node
