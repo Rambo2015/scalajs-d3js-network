@@ -73,21 +73,17 @@ case class D3Graph(targetDivID: String, width: Int, height: Int, tooltip: Toolti
     update()
   }
 
-  def markRootNode(clazz: String): Unit = {
+  def markNode(clazz: String)(when: NodeD3 => Boolean): Unit = {
     for (i <- 0 until d3Nodes.length) {
-      if (!d3Links.exists(_.target == d3Nodes(i))) {
+      if (when(d3Nodes(i))) {
         d3Nodes(i).statusClass = clazz
       }
     }
   }
 
-  def markLeafNode(clazz: String): Unit = {
-    for (i <- 0 until d3Nodes.length) {
-      if (!d3Links.exists(_.source == d3Nodes(i))) {
-        d3Nodes(i).statusClass = clazz
-      }
-    }
-  }
+  def markRootNode(clazz: String): Unit = markNode(clazz)(n => !d3Links.exists(_.target == n))
+
+  def markLeafNode(clazz: String): Unit = markNode(clazz)(n => !d3Links.exists(_.source == n))
 
   def addNode(node: NodeD3, needUpdate: Boolean = true) {
     //    println("Add node ...")
