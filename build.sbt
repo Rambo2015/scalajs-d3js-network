@@ -39,4 +39,16 @@ lazy val root = (project in file("."))
     bintrayOrganization := None,
     publishMavenStyle := true,
     licenses += ("MIT", url("http://opensource.org/licenses/MIT")),
+    pomExtra := <scm>
+      <url>git@github.com:iPomme/scalajs-d3js-network.git</url>
+      <connection>scm:git:git@github.com:iPomme/scalajs-d3js-network.git</connection>
+    </scm>
+      <developers>
+        <developer>
+          <id>iPomme</id>
+          <name>Nicolas Jorand</name>
+          <url>https://nicolas.jorand.io</url>
+        </developer>
+      </developers>,
+    homepage := Some(url("https://www.jorand.io"))
   )
