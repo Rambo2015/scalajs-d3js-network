@@ -1,23 +1,29 @@
 language: scala
 script:
-  - sbt ++$TRAVIS_SCALA_VERSION package
+- sbt ++$TRAVIS_SCALA_VERSION package
 after_success:
-  - sbt ++$TRAVIS_SCALA_VERSION publish
+- '[ "$TRAVIS_BRANCH" = "master" -a "$TRAVIS_PULL_REQUEST" = "false" ] && /bin/bash "$TRAVIS_BUILD_DIR/.travis.credentials.sh" && sbt publish'
+
 scala:
-  - 2.11.12
-  - 2.12.7
+- 2.11.12
+- 2.12.7
 jdk:
-  - oraclejdk8
-  - openjdk8
-sbt_args:
-  -no-colors -J-Xss2m
+- oraclejdk8
+- openjdk8
+sbt_args: "-no-colors -J-Xss2m"
 cache:
   directories:
-  - $HOME/.ivy2/cache
-  - $HOME/.sbt/boot/
+  - "$HOME/.ivy2/cache"
+  - "$HOME/.sbt/boot/"
 install:
-  - . $HOME/.nvm/nvm.sh
-  - nvm install stable
-  - nvm use stable
-  - npm install
-  - npm install jsdom
+- ". $HOME/.nvm/nvm.sh"
+- nvm install stable
+- nvm use stable
+- npm install
+- npm install jsdom
+env:
+  global:
+  - secure: CmNgdBbKBo5zAG5ZVuZKI7mIwVRkWe8A2ER+ewIrXrRfm+jCvVHZIXdl4lu+UIxB/tpnxl/mVW2y8m10tj0FEYibqr+FL3VZhGDqy3gzau/3SnF24m/wNxD3CFEK2LlOhJLLNmDnCR8icFH0QWEPrHIXC8uEUJ/TSN3y2w/22NEkJYMnAGx4Is2OmfX1RcR4MfTyd62RLeAsajFmG2Jew4ETvJaVePo77QJP9DXJ5SnJtaEY58eqcRmt3ZoICsv5garvhAl4qjwNkqxzlDp98etLzFNrfouwUWZGtfuNQLT8D9PZw9cJ97L1xm3lD5gLSYLMTGDk4UxKJ8puoZdeQZQw1takhizgoNn4uSZqPXKwjLCGQZ0xlBlhL1iwOhjN24HqjqDa04WEl+u2HmFG7epwnsmLHYt9bG6buGFuot95qaMmpOhMtO1mRGo4rmdewzHhZ3Ms7FiylKDUq0mWh5zSHJh5pLKMUBDO8pMytuBMHbyJ9vGs63T9VyHIQCOnrAOmmdbRAXd27oxyRY1QVGJkEg6NDcDgmHq7OXH7upWYVUMQthUNsUZErgbatvuxRESWngD9HesaU30D0chJPQmwxbBcbCua4c9eGkp/EvOK2OxX977dGvFRp7okD2Ft5lG7yzl7iB2stQEi+tu4+qrUJYzyKlvl5OrcYbSgtr0=
+  - secure: SgxDg+xtq5YHaR6cCV8X6Zjg9KRmd6FVFO6XZ3G6lYzOLsO/PnDhu2JqSpwPOyTR5Dj1AdGWuvBM6EasCBpx0hwACDbM0RdQ3NioIVtaPxZQCCCJtkEDY7/Ml1Q9zRq+JvDSetQ4pKdBZEZSvA4Dq6k6TmxBJwx5fuOV4KHZRFyEmwKR2zO55vaE0NwiUBWnYxyQlIiqRBQ2sHeonTmLsjb2Rke/FAdUYlfRmJkXwSa1H2Y7nm9gftBqRP2zYzzsqOOd86bA49BBDV3pdlJjraReyUkV8wYYCfrCwBb1bvKhMLVb72hElREahpIuirMFj2+5M1K99NjvEw6jwoNhyYMlOTFmcmBLwbmAaa4oypzvP88reW4xb2lKGmRRkRycfHCH8Ag3zgiMSz/NXGhZKqEgG7ATdds8VjTfo+Xzoz3QdH4EQvY7pN4QcmgAs1kinfhlDgAwr92UdOwGQIOHGlqoZmQIfUSoHDqYK0t9gPYdYpAWJ29hsCpRzAKfuqc6bm1FnWvQUM/GhCMTTd4yLq1W7r3deX6h5Ngc79GpybVygUtHKQspwcBtmnIsCHCtXOE+irxkymVk5cyYaNI+UpgXYs7vrp926q33A0w7CNf/J13HyAplR2l4opGK9h+dgJ/3iY9zXPz4byMMCHG0PHuYFODVEieIAd2HvVmlAHY=
+  - secure: kVPMoBH2NmFZPa9TNMTiA0mcHyr8ddNW3A52yyWm4d+CO3560CK9OJU0sbEzORbujqnxLfPGaoQrinOXJzH+iPIi5R9MTHAX9F0U+/3uXS4AJ6lYuy1g3WP5/4tJgCdbSnH5bxrTAx2FNBx5KhrQ1HUcctgKVAkjgmHv0xoDgMDCXSlWTz/g4c3+83v307uA9INMR/WdNH9guTS67mykqKfgjxQ3ba1YWNgwf9VcY/mBErgw4q8jOKc47UNzh6igacFPC8u4HqourvchW1VTYFlQNu2gUKncPGO5L+9oRRMSrqo75/NjbQvuShBlIxmDb9rSrm2ZVGgc2lYoxA4nP1hbIUrC8OOucONDcRvMFO8u9LUxG8SPTrm5VtAcL+cvoNAfxPDU/6wT5w/0w532OjP1vDhSygZ10242BgZXdTwSrB+d8o84T7T0f4gYRt4ALOxDTjpEQJLZLSxbXLOHILiLzilhDvAt6UcEa8S8pIEdEBXewYLuwQdak+OKBCmNYBbbblOV9ypN+qtmV0tYJ+wEYeNXnkprlqXBxca+St4y+mbsJwtFy7FmioS/MruHoW9sYPl15Kx3Od1W6BpyzGmDkR1fB9luaSM9NMvkhSpaDSYztFWJClZZWSSecJPPNm+cfOIurcM441Tt4ZRYA6PZ40KgyM5HRY3iUAW8+Eg=
+  - secure: TOtJ6YGfebXKRivfoD18jVp/LSUSJ2gmrHj4etDZMq5jRdZXi09lCXG/ZxLO9nmfKnXAbF3zwRxcapgZPbvbgkgRjIAP2bVEXktoOMFltA7Ym+Ya3DR9psvl1afBg4TdxMpBFEsLp11SYEOGDMB+zGhw2EeqoEyZCupQPBVFIHgkD8k74GKzSNY4stkxWQWoPixbMTp7tpzdLf5j4yKkeoyFlPLxmjtWFAF3b6BGCzaF+r6wBAFQiT97lXj+ACTO/SRs1LC7fzOfVefwnMT3p9oapbD9ZUslbgy18IB+XDJkWjkouBR/r0XLmQPIM+zRj9/s55K0g3ksD4OormfTGMsn3bo59NKUwynhWB2kCB3zdYxdn/KoC5bfXp0fm/+hirhQKg1z30I8ylMmGpuSS9fyr50SYFJPQxRI3aLQ1MdFbgjwzWg3VkGcbVmxigB61g/+Go4oI/2RcPVdEGcvVGjgLAIVOXO1N3+bkxQa8YFUGVSEAgRFGSVBuDwPxTqhUwySLh2Mz9GUt/vIAnmuBksISDZk2vTDzVK6PO0sLclzXpkYEwEaoaIBg0d4CCTBhImHTAxp1Vd2x5p1bRrnKdoHqZ90WSjF0xCIvWU8OjPc4I1StWrKbSDcOgT/orzqmSmf5RXEracvifWIN7vMSfD5v/4KL8kwQdejz3yFWIs=
