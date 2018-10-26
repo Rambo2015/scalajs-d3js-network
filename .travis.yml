@@ -1,11 +1,6 @@
 language: scala
 script:
 - sbt ++$TRAVIS_SCALA_VERSION package publish
-
-before_deploy: '[ "$TRAVIS_BRANCH" = "master" -a "$TRAVIS_PULL_REQUEST" = "false" ] && /bin/bash "$TRAVIS_BUILD_DIR/.travis.credentials.sh"'
-
-after_success:
-
 scala:
 - 2.11.12
 - 2.12.7
