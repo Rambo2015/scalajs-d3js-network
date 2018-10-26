@@ -14,7 +14,6 @@ realm = Artifactory Realm
 host = oss.jfrog.org
 user = $BINTRAY_USER
 password = $BINTRAY_PASSWORD
-
-echo 'credentials file created'
-ls $HOME/.bintray
 EOF
+echo 'credentials file created'
+ls ~/.bintray
