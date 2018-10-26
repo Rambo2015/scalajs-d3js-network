@@ -11,6 +11,7 @@ lazy val root = (project in file("."))
     name := "scalajs-d3js-network",
     version := "0.1",
     scalaVersion := "2.12.7",
+    crossScalaVersions := Seq("2.12.7"),
     parallelExecution := false,
     // This is an application with a main method
     scalaJSUseMainModuleInitializer := true,

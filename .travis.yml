@@ -1,11 +1,9 @@
 language: scala
 script:
-- sbt ++$TRAVIS_SCALA_VERSION package publish
+- sbt ++$TRAVIS_SCALA_VERSION +package +publish
 scala:
-- 2.11.12
 - 2.12.7
 jdk:
-- oraclejdk8
 - openjdk8
 sbt_args: "-no-colors -J-Xss2m"
 cache:
