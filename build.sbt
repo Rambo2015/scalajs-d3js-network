@@ -7,6 +7,34 @@ enablePlugins(BintrayPlugin)
 
 releaseEarlyEnableSyncToMaven := true
 
+inThisBuild(List(
+  // These are normal sbt settings to configure for release, skip if already defined
+  licenses += ("MIT", url("http://opensource.org/licenses/MIT")),
+  homepage := Some(url("https://www.jorand.io")),
+  developers := List(Developer("iPomme", "Nicolas Jorand", "nicolas@jorand.io", url("https://www.jorand.io"))),
+  scmInfo := Some(ScmInfo(url("git@github.com:iPomme/scalajs-d3js-network.git"), "scm:git:git@github.com:iPomme/scalajs-d3js-network.git")),
+
+  // These are the sbt-release-early settings to configure
+  pgpPublicRing := file("./travis/local.pubring.asc"),
+  pgpSecretRing := file("./travis/local.secring.asc"),
+  releaseEarlyWith := BintrayPublisher,
+
+  bintrayRepository := "scala",
+  bintrayOrganization := None,
+//  publishMavenStyle := true,
+//  pomExtra := <scm>
+//    <url>git@github.com:iPomme/scalajs-d3js-network.git</url>
+//    <connection>scm:git:git@github.com:iPomme/scalajs-d3js-network.git</connection>
+//  </scm>
+//    <developers>
+//      <developer>
+//        <id>iPomme</id>
+//        <name>Nicolas Jorand</name>
+//        <url>https://nicolas.jorand.io</url>
+//      </developer>
+//    </developers>,
+))
+
 lazy val root = (project in file("."))
   .settings(
     organization := "io.jorand",
@@ -15,8 +43,7 @@ lazy val root = (project in file("."))
     scalaVersion := "2.12.7",
     crossScalaVersions := Seq("2.12.7"),
     parallelExecution := false,
-    pgpPublicRing := file("./travis/local.pubring.asc"),
-    pgpSecretRing := file("./travis/local.secring.asc"),
+
     // This is an application with a main method
     scalaJSUseMainModuleInitializer := true,
     libraryDependencies ++= Seq(
@@ -39,20 +66,4 @@ lazy val root = (project in file("."))
 
     skip in packageJSDependencies := false,
 
-    bintrayRepository := "scala",
-    bintrayOrganization := None,
-    publishMavenStyle := true,
-    licenses += ("MIT", url("http://opensource.org/licenses/MIT")),
-    pomExtra := <scm>
-      <url>git@github.com:iPomme/scalajs-d3js-network.git</url>
-      <connection>scm:git:git@github.com:iPomme/scalajs-d3js-network.git</connection>
-    </scm>
-      <developers>
-        <developer>
-          <id>iPomme</id>
-          <name>Nicolas Jorand</name>
-          <url>https://nicolas.jorand.io</url>
-        </developer>
-      </developers>,
-    homepage := Some(url("https://www.jorand.io"))
   )
