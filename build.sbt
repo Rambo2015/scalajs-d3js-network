@@ -5,11 +5,13 @@ import sbt.Keys.scalaVersion
 enablePlugins(ScalaJSPlugin)
 enablePlugins(BintrayPlugin)
 
+releaseEarlyEnableSyncToMaven := true
+
 lazy val root = (project in file("."))
   .settings(
     organization := "io.jorand",
     name := "scalajs-d3js-network",
-    version := "0.1",
+    version := "0.1.1",
     scalaVersion := "2.12.7",
     crossScalaVersions := Seq("2.12.7"),
     parallelExecution := false,
