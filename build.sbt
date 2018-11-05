@@ -13,6 +13,8 @@ lazy val root = (project in file("."))
     scalaVersion := "2.12.7",
     crossScalaVersions := Seq("2.12.7"),
     parallelExecution := false,
+    pgpPublicRing := file("./travis/local.pubring.asc"),
+    pgpSecretRing := file("./travis/local.secring.asc"),
     // This is an application with a main method
     scalaJSUseMainModuleInitializer := true,
     libraryDependencies ++= Seq(
