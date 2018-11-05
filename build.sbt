@@ -12,7 +12,7 @@ inThisBuild(List(
   licenses += ("MIT", url("http://opensource.org/licenses/MIT")),
   homepage := Some(url("https://www.jorand.io")),
   developers := List(Developer("iPomme", "Nicolas Jorand", "nicolas@jorand.io", url("https://www.jorand.io"))),
-  scmInfo := Some(ScmInfo(url("git@github.com:iPomme/scalajs-d3js-network.git"), "scm:git:git@github.com:iPomme/scalajs-d3js-network.git")),
+  scmInfo := Some(ScmInfo(url("https://github.com/iPomme/scalajs-d3js-network.git"), "scm:git:git@github.com:iPomme/scalajs-d3js-network.git")),
 
   // These are the sbt-release-early settings to configure
   pgpPublicRing := file("./travis/local.pubring.asc"),
