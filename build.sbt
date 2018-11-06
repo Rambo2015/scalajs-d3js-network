@@ -7,34 +7,6 @@ enablePlugins(BintrayPlugin)
 
 releaseEarlyEnableSyncToMaven := true
 
-inThisBuild(List(
-  // These are normal sbt settings to configure for release, skip if already defined
-  licenses += ("MIT", url("http://opensource.org/licenses/MIT")),
-  homepage := Some(url("https://www.jorand.io")),
-  developers := List(Developer("iPomme", "Nicolas Jorand", "nicolas@jorand.io", url("https://www.jorand.io"))),
-  scmInfo := Some(ScmInfo(url("https://github.com/iPomme/scalajs-d3js-network.git"), "scm:git:git@github.com:iPomme/scalajs-d3js-network.git")),
-
-  // These are the sbt-release-early settings to configure
-  pgpPublicRing := file("./travis/local.pubring.asc"),
-  pgpSecretRing := file("./travis/local.secring.asc"),
-  releaseEarlyWith := BintrayPublisher,
-
-  bintrayRepository := "scala",
-  bintrayOrganization := None,
-//  publishMavenStyle := true,
-//  pomExtra := <scm>
-//    <url>git@github.com:iPomme/scalajs-d3js-network.git</url>
-//    <connection>scm:git:git@github.com:iPomme/scalajs-d3js-network.git</connection>
-//  </scm>
-//    <developers>
-//      <developer>
-//        <id>iPomme</id>
-//        <name>Nicolas Jorand</name>
-//        <url>https://nicolas.jorand.io</url>
-//      </developer>
-//    </developers>,
-))
-
 lazy val root = (project in file("."))
   .settings(
     organization := "io.jorand",
@@ -58,6 +30,7 @@ lazy val root = (project in file("."))
       "org.scalatest" %%% "scalatest" % "3.0.1" % "test"
     ),
 
+
     jsDependencies ++= Seq(
       "org.webjars" % "jquery" % "2.2.1" / "jquery.js" minified "jquery.min.js"
     ),
@@ -65,5 +38,19 @@ lazy val root = (project in file("."))
     jsEnv := new org.scalajs.jsenv.jsdomnodejs.JSDOMNodeJSEnv(),
 
     skip in packageJSDependencies := false,
+
+    bintrayRepository := "scala",
+    // These are normal sbt settings to configure for release, skip if already defined
+    licenses += ("MIT", url("http://opensource.org/licenses/MIT")),
+    homepage := Some(url("https://www.jorand.io")),
+    developers := List(Developer("iPomme", "Nicolas Jorand", "nicolas@jorand.io", url("https://www.jorand.io"))),
+    scmInfo := Some(ScmInfo(url("https://github.com/iPomme/scalajs-d3js-network.git"), "scm:git:git@github.com:iPomme/scalajs-d3js-network.git")),
+
+    // These are the sbt-release-early settings to configure
+    pgpPublicRing := file("./travis/local.pubring.asc"),
+    pgpSecretRing := file("./travis/local.secring.asc"),
+    releaseEarlyWith := BintrayPublisher,
+
+    bintrayOrganization := None,
 
   )
