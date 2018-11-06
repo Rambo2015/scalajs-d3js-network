@@ -39,7 +39,6 @@ lazy val root = (project in file("."))
   .settings(
     organization := "io.jorand",
     name := "scalajs-d3js-network",
-    version := "0.1.1",
     scalaVersion := "2.12.7",
     crossScalaVersions := Seq("2.12.7"),
     parallelExecution := false,
