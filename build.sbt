@@ -7,6 +7,20 @@ enablePlugins(BintrayPlugin)
 
 releaseEarlyEnableSyncToMaven := true
 
+inThisBuild(List(
+  // These are normal sbt settings to configure for release, skip if already defined
+  licenses += ("MIT", url("http://opensource.org/licenses/MIT")),
+  homepage := Some(url("https://www.jorand.io")),
+  developers := List(Developer("iPomme", "Nicolas Jorand", "nicolas@jorand.io", url("https://www.jorand.io"))),
+  scmInfo := Some(ScmInfo(url("https://github.com/iPomme/scalajs-d3js-network.git"), "scm:git:git@github.com:iPomme/scalajs-d3js-network.git")),
+
+  // These are the sbt-release-early settings to configure
+  pgpPublicRing := file("./travis/local.pubring.asc"),
+  pgpSecretRing := file("./travis/local.secring.asc"),
+  releaseEarlyWith := BintrayPublisher,
+
+))
+
 lazy val root = (project in file("."))
   .settings(
     organization := "io.jorand",
@@ -40,17 +54,6 @@ lazy val root = (project in file("."))
     skip in packageJSDependencies := false,
 
     bintrayRepository := "scala",
-    // These are normal sbt settings to configure for release, skip if already defined
-    licenses += ("MIT", url("http://opensource.org/licenses/MIT")),
-    homepage := Some(url("https://www.jorand.io")),
-    developers := List(Developer("iPomme", "Nicolas Jorand", "nicolas@jorand.io", url("https://www.jorand.io"))),
-    scmInfo := Some(ScmInfo(url("https://github.com/iPomme/scalajs-d3js-network.git"), "scm:git:git@github.com:iPomme/scalajs-d3js-network.git")),
-
-    // These are the sbt-release-early settings to configure
-    pgpPublicRing := file("./travis/local.pubring.asc"),
-    pgpSecretRing := file("./travis/local.secring.asc"),
-    releaseEarlyWith := BintrayPublisher,
-
     bintrayOrganization := None,
 
   )
