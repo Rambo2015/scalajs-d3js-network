@@ -23,7 +23,8 @@ inThisBuild(List(
   releaseEarlyWith := BintrayPublisher,
   bintrayOrganization := None,
   bintrayReleaseOnPublish := true,
-  releaseEarlyEnableSyncToMaven := false
+  releaseEarlyEnableSyncToMaven := false,
+  releaseEarlyEnableLocalReleases := true
 
 
 ))
