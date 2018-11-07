@@ -5,28 +5,32 @@ import sbt.Keys.scalaVersion
 enablePlugins(ScalaJSPlugin)
 enablePlugins(BintrayPlugin)
 
-releaseEarlyEnableSyncToMaven := true
 
 inThisBuild(List(
+  organization := "io.jorand",
+  name := "scalajs-d3js-network",
+  scalaVersion := "2.12.7",
+  crossScalaVersions := Seq("2.12.7"),
   // These are normal sbt settings to configure for release, skip if already defined
   licenses += ("MIT", url("http://opensource.org/licenses/MIT")),
   homepage := Some(url("https://www.jorand.io")),
   developers := List(Developer("iPomme", "Nicolas Jorand", "nicolas@jorand.io", url("https://www.jorand.io"))),
-  scmInfo := Some(ScmInfo(url("https://github.com/iPomme/scalajs-d3js-network.git"), "scm:git:git@github.com:iPomme/scalajs-d3js-network.git")),
+  scmInfo := Some(ScmInfo(url("https://github.com/iPomme/${name.value}"), "scm:git:git@github.com:iPomme/${name.value}.git")),
 
   // These are the sbt-release-early settings to configure
   pgpPublicRing := file("./travis/local.pubring.asc"),
   pgpSecretRing := file("./travis/local.secring.asc"),
   releaseEarlyWith := BintrayPublisher,
+  bintrayRepository := "scala",
+  bintrayOrganization := None,
+  releaseEarlyEnableSyncToMaven := false
+
 
 ))
 
 lazy val root = (project in file("."))
   .settings(
-    organization := "io.jorand",
-    name := "scalajs-d3js-network",
-    scalaVersion := "2.12.7",
-    crossScalaVersions := Seq("2.12.7"),
+
     parallelExecution := false,
 
     // This is an application with a main method
@@ -51,8 +55,5 @@ lazy val root = (project in file("."))
     jsEnv := new org.scalajs.jsenv.jsdomnodejs.JSDOMNodeJSEnv(),
 
     skip in packageJSDependencies := false,
-
-    bintrayRepository := "scala",
-    bintrayOrganization := None,
 
   )

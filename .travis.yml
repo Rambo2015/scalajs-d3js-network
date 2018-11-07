@@ -1,28 +1,33 @@
 sudo: false
 language: scala
 script:
-- sbt ++$TRAVIS_SCALA_VERSION test
+  - sbt ++$TRAVIS_SCALA_VERSION test
 scala:
-- 2.12.7
+  - 2.12.7
 jdk:
-- openjdk8
+  - openjdk8
 sbt_args: "-no-colors -J-Xss2m"
 cache:
   directories:
   - "$HOME/.ivy2/cache"
   - "$HOME/.sbt/boot/"
 install:
-- ". $HOME/.nvm/nvm.sh"
-- nvm install stable
-- nvm use stable
-- npm install
-- npm install jsdom
+  - ". $HOME/.nvm/nvm.sh"
+  - nvm install stable
+  - nvm use stable
+  - npm install
+  - npm install jsdom
+
+before_cache:
+  # Cleanup the cached directories to avoid unnecessary cache updates
+  - "find $HOME/.ivy2/cache -name \"ivydata-*.properties\" -print -delete"
+  - "find $HOME/.sbt        -name \"*.lock\"               -print -delete"
+
 after_success:
-- if [ $TRAVIS_PULL_REQUEST = 'false' ]; then sbt ++$TRAVIS_SCALA_VERSION releaseEarly;
+  - if [ $TRAVIS_PULL_REQUEST = 'false' ]; then sbt ++$TRAVIS_SCALA_VERSION releaseEarly;
   fi
 before_install:
-- openssl aes-256-cbc -K $encrypted_509fe8dcfe1d_key -iv $encrypted_509fe8dcfe1d_iv
-  -in travis/secrets.tar.enc -out travis/local.secrets.tar -d
+  - openssl aes-256-cbc -K $encrypted_509fe8dcfe1d_key -iv $encrypted_509fe8dcfe1d_iv -in travis/secrets.tar.enc -out travis/local.secrets.tar -d
 env:
   global:
   - secure: W9dFJGutfY8QjKleqFaunZYKknKiAA+T10RC8KiOTWE4l40q5HXuTuTwlifR2Ln/O0/iUxE/ucqtGD+QtAbK/lMqDW5f3bDL1A4keV0+rvbNqQ7LFfIam/kZuLNErNN3mZTJvwn0qOuqtO3sOGu1zGIgkxjrBwAziAO03588sV1VL+rL6+ZgPuUnNONzbpcKyunxXH9NlglFY94vubrbYhP7aEzi0ZwfgHtRYtLG8foHbvrp2gQgCN2BjTo4t8F5pjtXGsjxuf9COqqmyIRWYWCcn0O/58lTqwXNnXH3GuyFx6ZTqH+74CCMoNkhiYVmv28mVUru3fiPCTKVgjRQCLcdXAAQam5XPd3Fl8Xpgq8OWYgQdTLCQHbw3JLqQFvuWU4Vvavcxreh5m6WhHsU0tC38ovqJwi+H4Tb7siz9whfqtw1R4WRF9U3T2e4hFRCmQOBhIcBWfV3bhiQfo3g16uYSvOZSx5y/a83iVRIR4hQlGQval08dKu4QVPJxFMZblFxqv6+qCykONDW9QxD9jhe73wD8SRlywmBOYxOUniaQEtJFBrUPH8xL5BWrzaXip5sM9zg72J5Q260m8Mkc+8+ku9kQEIBJBg2T6+DhXE/zzhAFnS3HMn5cHpo9liSNhObafUooDOdAGiwXys2FPvkbsMCP/vm6+TGgmcIjIw=
