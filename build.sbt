@@ -27,7 +27,7 @@ inThisBuild(List(
 
 ))
 
-lazy val root = (project in file("."))
+lazy val root = Project(id = "scalajs-d3js-network", base = file("."))
   .settings(
 
     parallelExecution := false,
