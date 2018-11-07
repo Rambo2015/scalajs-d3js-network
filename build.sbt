@@ -22,6 +22,7 @@ inThisBuild(List(
   pgpSecretRing := file("./travis/local.secring.asc"),
   releaseEarlyWith := BintrayPublisher,
   bintrayOrganization := None,
+  bintrayReleaseOnPublish := true,
   releaseEarlyEnableSyncToMaven := false
 
 
