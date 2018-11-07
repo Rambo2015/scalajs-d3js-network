@@ -21,7 +21,6 @@ inThisBuild(List(
   pgpPublicRing := file("./travis/local.pubring.asc"),
   pgpSecretRing := file("./travis/local.secring.asc"),
   releaseEarlyWith := BintrayPublisher,
-  bintrayRepository := "scala",
   bintrayOrganization := None,
   releaseEarlyEnableSyncToMaven := false
 
@@ -32,6 +31,8 @@ lazy val root = (project in file("."))
   .settings(
 
     parallelExecution := false,
+
+    bintrayRepository := "scala",
 
     // This is an application with a main method
     scalaJSUseMainModuleInitializer := true,
