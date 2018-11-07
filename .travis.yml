@@ -24,8 +24,7 @@ before_cache:
   - "find $HOME/.sbt        -name \"*.lock\"               -print -delete"
 
 after_success:
-  - if [ $TRAVIS_PULL_REQUEST = 'false' ]; then sbt ++$TRAVIS_SCALA_VERSION releaseEarly;
-  fi
+  - if [ $TRAVIS_PULL_REQUEST = 'false' ]; then sbt ++$TRAVIS_SCALA_VERSION releaseEarly;fi
 before_install:
   - openssl aes-256-cbc -K $encrypted_509fe8dcfe1d_key -iv $encrypted_509fe8dcfe1d_iv -in travis/secrets.tar.enc -out travis/local.secrets.tar -d
 env:
