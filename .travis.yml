@@ -1,4 +1,6 @@
-sudo: false
+before_script:
+ - echo 'Europe/Zurich' | sudo tee /etc/timezone
+ - sudo dpkg-reconfigure --frontend noninteractive tzdata
 language: scala
 script:
   - sbt ++$TRAVIS_SCALA_VERSION test
@@ -24,6 +26,7 @@ before_cache:
   - "find $HOME/.sbt        -name \"*.lock\"               -print -delete"
 
 after_success:
+  - git describe git describe --long --tags --abbrev=8 --always
   - if [ $TRAVIS_PULL_REQUEST = 'false' ]; then sbt ++$TRAVIS_SCALA_VERSION 'show dynverGitDescribeOutput';fi
   - if [ $TRAVIS_PULL_REQUEST = 'false' ]; then sbt ++$TRAVIS_SCALA_VERSION releaseEarly;fi
 before_install:
