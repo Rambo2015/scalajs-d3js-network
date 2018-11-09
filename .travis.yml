@@ -26,7 +26,7 @@ before_cache:
   - "find $HOME/.sbt        -name \"*.lock\"               -print -delete"
 
 after_success:
-  - git describe git describe --long --tags --abbrev=8 --always
+  - git status
   - if [ $TRAVIS_PULL_REQUEST = 'false' ]; then sbt ++$TRAVIS_SCALA_VERSION 'show dynverGitDescribeOutput';fi
   - if [ $TRAVIS_PULL_REQUEST = 'false' ]; then sbt ++$TRAVIS_SCALA_VERSION releaseEarly;fi
 before_install:

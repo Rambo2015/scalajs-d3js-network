@@ -1,31 +1,7 @@
 local.*
-logs
-log
-project/project
-project/target
-target
-tmp
-.history
-dist
-.idea
-*.iml
-/out
-.idea_modules
-.classpath
-.project
-/RUNNING_PID
-.settings
+*.class
+*.log
+target/
+.idea/
 .DS_Store
 node_modules
-
-# temp files
-.~*
-*~
-*.orig
-
-# eclipse
-.scala_dependencies
-.buildpath
-.cache
-.target
-bin/
