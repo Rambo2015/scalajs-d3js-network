@@ -24,8 +24,6 @@ inThisBuild(List(
   bintrayOrganization := None,
   bintrayReleaseOnPublish := true,
   releaseEarlyEnableSyncToMaven := false,
-  releaseEarlyEnableLocalReleases := true
-
 
 ))
 
